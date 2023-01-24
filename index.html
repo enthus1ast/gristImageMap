@@ -164,8 +164,7 @@ function dragEndListener(event) {
   );
   // grist.selectedTable.updateRecords({"X": [900], "Y": [100]}, [1])
   //console.log(grist.mapColumnNamesBack())
-
-  // we must map back to the original values, but we have no
+  // we must map back to the original values
   let payload = {}
   payload[globalMap["X"]] = [Number(event.target.dataset.x)]
   payload[globalMap["Y"]] = [Number(event.target.dataset.y)]
@@ -209,13 +208,17 @@ function dragEndListener(event) {
     bottom: 0px;
     font-family: monospace;
   }
+  .settings > ul {
+    list-style: none;
+    padding-left: 0px;
+  }
 </style>
 
 <div class="settings">
   <ul>
-    <li><input type="checkbox" name="moveEnabled" id="moveEnabled">moveEnabled</li>
-    <li><input type="checkbox" name="scrollIntoView" id="scrollIntoView" checked>scrollIntoView</li>
-    <li><input type="checkbox" name="showDetails" id="showDetails" checked>showDetails</li>
+    <li><input type="checkbox" name="moveEnabled" id="moveEnabled"><label for="moveEnabled">moveEnabled</label> </li>
+    <li><input type="checkbox" name="scrollIntoView" id="scrollIntoView" checked><label for="scrollIntoView">scrollIntoView</label> </li>
+    <li><input type="checkbox" name="showDetails" id="showDetails" checked><label for="showDetails">showDetails</label> </li>
   </ul>
 </div>
 
