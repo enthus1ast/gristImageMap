@@ -262,13 +262,14 @@ function main() {
       end: dragEndListener,
     },
     modifiers: [
-      interact.modifiers.snap({
-        targets: [
-          interact.snappers.grid({ x: 30, y: 30 })
-        ],
-        range: Infinity,
-        relativePoints: [ { x: 0, y: 0 } ]
-      }),
+      // interact.modifiers.snap({
+      //   targets: [
+      //     interact.snappers.grid({ x: 30, y: 30 })
+      //   ],
+      //   offset: "parent",
+      //   range: Infinity,
+      //   relativePoints: [ { x: 0, y: 0 } ]
+      // }),
     ]
   })
   interact('.item').on("tap", tapListener)
