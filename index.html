@@ -1,5 +1,4 @@
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
 
@@ -14,11 +13,6 @@ var pointX = 0
 var pointY = 0
 var start = { x: 0, y: 0 }
 var zoom = null // later set in main
-
-
-
-
-
 
 
 function isCheckboxConfig(name) {
@@ -336,15 +330,27 @@ function initZoom2() {
   var pointX = 0
   var pointY = 0
   var scale = 1
+  var scaleSpeed = 1.1;
   zoom.onwheel = function (e) {
     e.preventDefault();
     var xs = (e.clientX - pointX) / scale,
       ys = (e.clientY - pointY) / scale,
       delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
-    (delta > 0) ? (scale *= 1.2) : (scale /= 1.2);
+    (delta > 0) ? (scale *= scaleSpeed) : (scale /= scaleSpeed);
     pointX = e.clientX - xs * scale;
     pointY = e.clientY - ys * scale;
+    // window.scrollTo(window.scrollX + pointX, window.scrollY + pointY)
+    // zoom.style.transformOrigin = e.clientX + "px, " + e.clientY + "px"
+    // zoom.style.transformOrigin = `${e.pointX}px ${e.pointY}px`
+    // console.log(`${pointX}px ${pointY}px`)
+    let to = `${e.pageX}px ${e.pageY}px`
+    console.log(to)
+    zoom.style.transformOrigin = to
     zoom.style.transform = "scale(" + scale + ")"
+    // zoom.style.transform = "scale(" + 1.2 + ")"
+    // zoom.style.transform = "scale(1.5)"
+
+    // dragMoveListenerContainer(e)
   }
 }
 
@@ -352,8 +358,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
     main()
     //initZoom()
     initZoom2()
-
-
 });
 
 
@@ -374,9 +378,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
     background-size: auto;
     overflow-y: scoll;
 
-    transform-origin: 0px 0px;
+    /* transform-origin: 0px 0px; */
     transform: scale(1) translate(0px, 0px);
     cursor: grab;
+    /* transform-origin: center; */
   }
 
   .item {
