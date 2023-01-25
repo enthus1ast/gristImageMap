@@ -181,14 +181,15 @@ function tapListener(event) {
 }
 
 
-function positionElement(elem, x, y) {
+function positionElement(elem, x, y, scale = 1) {
   // console.log("positionElement", elem, x, y)
   // translate the element
-  elem.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+  elem.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')'
 
   // update the posiion attributes
   elem.setAttribute('data-x', x)
   elem.setAttribute('data-y', y)
+  elem.setAttribute('data-scale', scale)
 }
 
 
@@ -201,10 +202,12 @@ function dragMoveListener(event) {
     interact.stop();
     return false
   }
+
+  var container = document.getElementById("container")
   var target = event.target
   // keep the dragged position in the data-x/data-y attributes
-  var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-  var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+  var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx / container.dataset.scale
+  var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy / container.dataset.scale
   positionElement(target, x , y)
 }
 
@@ -270,7 +273,7 @@ function main() {
   })
   interact('.item').on("tap", tapListener)
 
-  interact('body').draggable({
+  interact('.container').draggable({
     listeners: {
         move: dragMoveListenerContainer,
         //end: dragEndListener,
@@ -279,9 +282,23 @@ function main() {
 
 } // main end
 
+// function dragMoveListenerContainer(event) {
+//   // Drag to scroll
+//   window.scrollTo(event.x0 - event.clientX, event.y0 - event.clientY)
+// }
+
 function dragMoveListenerContainer(event) {
   // Drag to scroll
-  window.scrollTo(event.x0 - event.clientX, event.y0 - event.clientY)
+  // window.scrollTo(event.x0 - event.clientX, event.y0 - event.clientY)
+  var target = event.target
+  // keep the dragged position in the data-x/data-y attributes
+  var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+  var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+  positionElement(target, x , y, target.dataset.scale)
+  // let container = event.target
+  // console.log(event)
+  // // container.style.transform = `scale(1) translate(${event.clientX - event.x0}px, ${event.clientY - event.d0}px)`
+  // container.style.transform = `scale(1) translate(${event.clientX}px, ${event.clientY}px)`
 }
 
 function initZoom() {
@@ -327,15 +344,19 @@ function initZoom() {
 
 function initZoom2() {
   let zoom = document.getElementById("container") //.style.transform = "scale(0.2)"
-  var pointX = 0
-  var pointY = 0
+  // var pointX = 0
+  // var pointY = 0
+  // var pointX = zoom.dataset.x
+  // var pointY = zoom.dataset.y
   var scale = 1
   var scaleSpeed = 1.1;
   zoom.onwheel = function (e) {
     e.preventDefault();
-    var xs = (e.clientX - pointX) / scale,
-      ys = (e.clientY - pointY) / scale,
-      delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
+    var pointX = zoom.dataset.x
+    var pointY = zoom.dataset.y
+    var xs = (e.clientX - pointX) / scale
+    var ys = (e.clientY - pointY) / scale
+    var delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
     (delta > 0) ? (scale *= scaleSpeed) : (scale /= scaleSpeed);
     pointX = e.clientX - xs * scale;
     pointY = e.clientY - ys * scale;
@@ -343,10 +364,11 @@ function initZoom2() {
     // zoom.style.transformOrigin = e.clientX + "px, " + e.clientY + "px"
     // zoom.style.transformOrigin = `${e.pointX}px ${e.pointY}px`
     // console.log(`${pointX}px ${pointY}px`)
-    let to = `${e.pageX}px ${e.pageY}px`
-    console.log(to)
-    zoom.style.transformOrigin = to
-    zoom.style.transform = "scale(" + scale + ")"
+    // let to = `${e.pageX}px ${e.pageY}px`
+    // console.log(to)
+    // zoom.style.transformOrigin = to
+    // zoom.style.transform = "scale(" + scale + ")"
+    positionElement(zoom, pointX, pointY, scale)
     // zoom.style.transform = "scale(" + 1.2 + ")"
     // zoom.style.transform = "scale(1.5)"
 
@@ -356,7 +378,7 @@ function initZoom2() {
 
 window.addEventListener('DOMContentLoaded', (event) => {
     main()
-    //initZoom()
+    // initZoom()
     initZoom2()
 });
 
@@ -382,6 +404,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     transform: scale(1) translate(0px, 0px);
     cursor: grab;
     /* transform-origin: center; */
+    transform-origin: 0 0;
   }
 
   .item {
