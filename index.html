@@ -3,47 +3,38 @@
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
 
+// Globals
+var globalMap = null; // the global mapping
+var globalImg = null
+
+
 function isCheckboxConfig(name) {
   return document.getElementById(name).checked
 }
 
 
-var globalMap = null; // the global mapping
+function changeBackgroundImage(url) {
+  // Changes the background image to the given url
+  // If the url is empty it is not changed.
+  if (url == "") {return}
+  let bgimg = document.getElementById("backgroundImage")
+  bgimg.src = url
+  globalImg = url
+}
 
-grist.ready({
-    requiredAccess: 'full',
-    columns: [
-      'Title',
-      'X',
-      'Y',
-      {name:'fontSize', optional: true},
-      {name:'bgColor', optional: true},
-      {name:'fgColor', optional: true},
-      {name:'details', optional: true, allowMultiple: true}
-     ],
-  });
-grist.onRecord(gristOnRecordHandler);
-grist.onRecords(gristOnRecordsHandler);
-grist.onOptions(gristOnOptions);
-grist.onRec
-// Setup interaction
-interact('.item').draggable({
-  autoScroll: true,
-  listeners: {
-    move: dragMoveListener,
-    end: dragEndListener,
-  },
-  modifiers: [
-    interact.modifiers.snap({
-      targets: [
-        interact.snappers.grid({ x: 30, y: 30 })
-      ],
-      range: Infinity,
-      relativePoints: [ { x: 0, y: 0 } ]
-    }),
-  ]
-})
-interact('.item').on("tap", tapListener)
+
+function getDefaultBgImage() {
+  const params = new URLSearchParams(location.search);
+  let backgroundImage = params.get("backgroundImage")
+  return backgroundImage
+}
+
+
+function getCurrentBgImage() {
+  // let bgimg = document.getElementById("backgroundImage");
+  // return bgimg.src
+  return globalImg;
+}
 
 
 function removeAllHighlights() {
@@ -51,10 +42,27 @@ function removeAllHighlights() {
   for (let index = 0; index < highlights.length; index++) {
     const element = highlights[index];
     element.classList.remove("highlight")
-
   }
 }
 
+function hideAllThatAreOnAnotherImage() {
+  // This function hides all entries that should be on another image
+  let items = document.getElementsByClassName("item")
+
+  let currentBg = getCurrentBgImage()
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    let itemBg = JSON.parse(atob(item.dataset.recordjson)).bgImage
+    if ((itemBg == NULL) || (currentBg == itemBg)) {
+      item.style.display = "inherit"
+      console.log("Show:", item, "itembg", itemBg, "CurrentBg", currentBg)
+    } else {
+      item.style.display = "none"
+      console.log("Hide:", item, itemBg, "CurrentBg", currentBg)
+    }
+
+  }
+}
 
 // Grist handlers
 function gristOnRecordHandler(recordRaw, mappings) {
@@ -68,8 +76,15 @@ function gristOnRecordHandler(recordRaw, mappings) {
   console.log("Add highlight to:", doc)
   doc.classList.add("highlight");
   if (isCheckboxConfig("scrollIntoView")) {
-    doc.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
+    doc.scrollIntoView({behavior: "auto", block: "center", inline: "center"})
   }
+  if (record["bgImage"] == "") {
+    changeBackgroundImage(getDefaultBgImage());
+  } else {
+    changeBackgroundImage(record["bgImage"]);
+  }
+  hideAllThatAreOnAnotherImage()
+
 }
 
 
@@ -80,6 +95,13 @@ function gristOnRecordsHandler(records, mappings) {
   for (let idx = 0; idx < records.length; idx++) {
     var recordRaw = records[idx];
     const record = grist.mapColumnNames(recordRaw);
+
+    // TODO we filter elements based on their image.
+    // So we only show elements that SHOULD be on this image.
+    // if (record.bgImage != getCurrentBgImage()) {
+    //   return
+    // }
+
     let doc = document.querySelector('[data-gristid="' + recordRaw.id + '"]')
     if (doc === null) {
       // Not found create!
@@ -108,6 +130,8 @@ function gristOnRecordsHandler(records, mappings) {
       doc.dataset.recordjson = btoa(JSON.stringify(record));
     }
   } // for end
+
+  hideAllThatAreOnAnotherImage()
 }
 
 
@@ -128,6 +152,7 @@ function tapListener(event) {
   }
 }
 
+
 function positionElement(elem, x, y) {
   // console.log("positionElement", elem, x, y)
   // translate the element
@@ -137,6 +162,7 @@ function positionElement(elem, x, y) {
   elem.setAttribute('data-x', x)
   elem.setAttribute('data-y', y)
 }
+
 
 function dragMoveListener(event) {
   // This should later do nothing IN grist, but show some data
@@ -152,8 +178,8 @@ function dragMoveListener(event) {
   var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
   var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
   positionElement(target, x , y)
-
 }
+
 
 function dragEndListener(event) {
   // This writes back the position to the grist row
@@ -170,6 +196,58 @@ function dragEndListener(event) {
   payload[globalMap["Y"]] = [Number(event.target.dataset.y)]
   grist.selectedTable.updateRecords(payload, [Number(event.target.dataset.gristid)])
 }
+
+
+function main() {
+  // The main function that gets executed when the dom is ready
+
+  // Get the bgimage from the query params
+  backgroundImage = getDefaultBgImage();
+  changeBackgroundImage(backgroundImage);
+
+  grist.ready({
+      requiredAccess: 'full',
+      columns: [
+        'Title',
+        'X',
+        'Y',
+        {name:'fontSize', optional: true},
+        {name:'bgColor', optional: true},
+        {name:'fgColor', optional: true},
+        {name:'details', optional: true, allowMultiple: true},
+        {name:'bgImage', optional: true}
+      ],
+    });
+  grist.onRecord(gristOnRecordHandler);
+  grist.onRecords(gristOnRecordsHandler);
+  grist.onOptions(gristOnOptions);
+  grist.onRec
+  // Setup interaction
+  interact('.item').draggable({
+    autoScroll: true,
+    listeners: {
+      move: dragMoveListener,
+      end: dragEndListener,
+    },
+    modifiers: [
+      interact.modifiers.snap({
+        targets: [
+          interact.snappers.grid({ x: 30, y: 30 })
+        ],
+        range: Infinity,
+        relativePoints: [ { x: 0, y: 0 } ]
+      }),
+    ]
+  })
+  interact('.item').on("tap", tapListener)
+
+} // main end
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    main()
+
+});
+
 
 </script>
 
@@ -226,6 +304,7 @@ function dragEndListener(event) {
 
 
 <div class="container" id="container" >
-  <img src="UK007500.png" alt="">
+  <!-- <img src="UK007500.png" alt="" id="backgroundImage"> -->
+  <img alt="Background Image" id="backgroundImage">
   <!-- <div class="item" data-gristid="123">Foo</div>  -->
 </div>
