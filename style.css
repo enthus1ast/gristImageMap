@@ -1,0 +1,76 @@
+body {
+  background-color: lightgrey;
+}
+
+.settings {
+  background-color: #808080d1;
+  z-index: 1000;
+  position: fixed;
+  right: 0px;
+  top: 0px;
+}
+
+.settings button {
+    width: 100%;
+}
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  /* background-image: url("UK007500.png"); */
+  background-size: auto;
+  overflow-y: scoll;
+
+  /* transform-origin: 0px 0px; */
+  transform: scale(1) translate(0px, 0px);
+  cursor: grab;
+  /* transform-origin: center; */
+  transform-origin: 0 0;
+}
+
+.item {
+  position: absolute;
+  /* touch-action: none;
+  user-select: none; */
+  /* transform: translate(0px, 0px); */
+  border: 1px solid black;
+}
+
+.itemMoveable {
+  touch-action: none;
+  user-select: none;
+}
+
+.highlight {
+  background-color: red !important;
+  border: 1px solid #00ff13;
+}
+
+.details {
+  background-color: grey;
+  z-index: 1000;
+  position: fixed;
+  bottom: 0px;
+  font-family: monospace;
+}
+
+#detailsTitle, #detailsText {
+  padding: 5px;
+}
+
+#detailsControls {
+  width: 100%;
+  text-align: right;
+  background-color: lightgrey;
+}
+
+
+.settings > ul {
+  list-style: none;
+  padding-left: 0px;
+}
+
+#backgroundImage {
+  touch-action: none;
+  user-select: none;
+}
