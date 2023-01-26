@@ -73,7 +73,7 @@ function hideAllThatAreOnAnotherImage() {
   for (let index = 0; index < items.length; index++) {
     const item = items[index];
     let itemBg = JSON.parse(atob(item.dataset.recordjson)).bgImage
-    if ((itemBg == null) || (currentBg == itemBg)) {
+    if ((itemBg == "") || (currentBg == itemBg)) {
       item.style.display = "inherit"
       console.log("Show:", item, "itembg", itemBg, "CurrentBg", currentBg)
     } else {
@@ -100,6 +100,7 @@ function gristOnRecordHandler(recordRaw, mappings) {
   }
   if (record["bgImage"] == "") {
     changeBackgroundImage(getDefaultBgImage());
+    record["bgImage"] = getDefaultBgImage();
   } else {
     changeBackgroundImage(record["bgImage"]);
   }
@@ -142,7 +143,7 @@ function gristOnRecordsHandler(records, mappings) {
       elem.style.color = record.fgColor;
       elem.style.backgroundColor = record.bgColor;
       elem.style.fontSize = record.fontSize + "px";
-      // var obj = container.appendChild(elem);
+      var obj = container.appendChild(elem);
       positionElement(obj, elem.dataset.x , elem.dataset.y)
     } else {
       // Found change it!
